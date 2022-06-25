@@ -56,13 +56,13 @@ func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) writeToken(w http.ResponseWriter, user *model.User) {
-	token, err := h.Service.GenerateToken(user)
+	token, err := h.Service.GenerateToken(user, h.TokenAuth)
 	if err != nil {
 		log.Println(err.Error())
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	w.Header().Set("Token", token)
+	w.Header().Set("Authorization", "BEARER "+token)
 }
 
 func readingUserData(w http.ResponseWriter, r *http.Request, user *model.User) error {

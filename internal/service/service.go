@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"github.com/go-chi/jwtauth/v5"
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/storage"
 )
@@ -10,7 +11,7 @@ import (
 type AuthServiceContract interface {
 	CreateUser(ctx context.Context, user *model.User) error
 	AuthenticationUser(ctx context.Context, user *model.User) error
-	GenerateToken(user *model.User) (string, error)
+	GenerateToken(user *model.User, tokenAuth *jwtauth.JWTAuth) (string, error)
 }
 
 type OrderServiceContract interface {
