@@ -11,7 +11,7 @@ import (
 //Логику по доступу в черный ящик тоже через интерфейс в папке accrual
 
 type AuthServiceContract interface {
-	CreateUser(ctx context.Context, user model.User) (int, error)
+	CreateUser(ctx context.Context, user model.User) error
 }
 
 type OrderServiceContract interface {

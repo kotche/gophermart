@@ -13,7 +13,7 @@ const (
 )
 
 type AuthRepoContract interface {
-	CreateUser(ctx context.Context, user model.User) (int, error)
+	CreateUser(ctx context.Context, user model.User) error
 	GetUser(ctx context.Context, login, password string) (model.User, error)
 }
 
@@ -27,7 +27,7 @@ func NewAuthService(repo AuthRepoContract) *AuthService {
 	}
 }
 
-func (auth *AuthService) CreateUser(ctx context.Context, user model.User) (int, error) {
+func (auth *AuthService) CreateUser(ctx context.Context, user model.User) error {
 	user.Password = generatePasswordHash(user.Password)
 	return auth.repo.CreateUser(ctx, user)
 }

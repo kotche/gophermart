@@ -35,9 +35,9 @@ func (p *PGX) Ping() error {
 
 func (p *PGX) Init() {
 	_, err := p.DB.Exec(`CREATE TABLE IF NOT EXISTS public.users(
-		    user_id VARCHAR(100) NOT NULL PRIMARY KEY,
-    		login VARCHAR(100) NOT NULL,
-    		password VARCHAR(100) NOT NULL);`)
+		    id SERIAL PRIMARY KEY,
+    		login VARCHAR(255) NOT NULL UNIQUE,
+    		password VARCHAR(255) NOT NULL);`)
 
 	if err != nil {
 		log.Fatal(err.Error())

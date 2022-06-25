@@ -7,8 +7,8 @@ import (
 	"github.com/kotche/gophermart/internal/model"
 )
 
-// LoadOrder POST /api/user/orders - загрузка номера заказа
-func (h *Handler) LoadOrder(w http.ResponseWriter, r *http.Request) {
+// loadOrder POST /api/user/orders - загрузка номера заказа
+func (h *Handler) loadOrder(w http.ResponseWriter, r *http.Request) {
 	var order model.Order
 
 	ctx := context.Background()

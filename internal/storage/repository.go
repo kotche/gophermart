@@ -9,7 +9,7 @@ import (
 )
 
 type AuthRepoContract interface {
-	CreateUser(ctx context.Context, user model.User) (int, error)
+	CreateUser(ctx context.Context, user model.User) error
 	GetUser(ctx context.Context, login, password string) (model.User, error)
 }
 
