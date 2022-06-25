@@ -7,15 +7,14 @@ import (
 	"github.com/kotche/gophermart/internal/storage"
 )
 
-//Из сервиса убрать интерфейсы. Оставить только в репозитории.
-//Логику по доступу в черный ящик тоже через интерфейс в папке accrual
-
 type AuthServiceContract interface {
-	CreateUser(ctx context.Context, user model.User) error
+	CreateUser(ctx context.Context, user *model.User) error
+	AuthenticationUser(ctx context.Context, user *model.User) error
+	GenerateToken(user *model.User) (string, error)
 }
 
 type OrderServiceContract interface {
-	LoadOrder(ctx context.Context, order model.Order) (int, error)
+	LoadOrder(ctx context.Context, order *model.Order) (int, error)
 }
 
 type BalanceServiceContract interface {

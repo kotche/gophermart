@@ -7,7 +7,7 @@ import (
 )
 
 type OrderRepoContract interface {
-	LoadOrder(ctx context.Context, order model.Order) (int, error)
+	LoadOrder(ctx context.Context, order *model.Order) (int, error)
 }
 
 type OrderService struct {
@@ -20,6 +20,6 @@ func NewOrderService(repo OrderRepoContract) *OrderService {
 	}
 }
 
-func (o *OrderService) LoadOrder(ctx context.Context, order model.Order) (int, error) {
+func (o *OrderService) LoadOrder(ctx context.Context, order *model.Order) (int, error) {
 	return o.repo.LoadOrder(ctx, order)
 }

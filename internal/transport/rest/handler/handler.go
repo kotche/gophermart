@@ -25,6 +25,7 @@ func (h *Handler) InitRoutes() *chi.Mux {
 	router.Use(middlewares.Authorization)
 
 	router.Post("/api/user/register", h.registration)
+	router.Post("/api/user/login", h.authentication)
 	router.Post("/api/user/orders", h.loadOrder)
 	router.Get("/api/user/balance", h.getCurrentBalance)
 

@@ -9,12 +9,12 @@ import (
 )
 
 type AuthRepoContract interface {
-	CreateUser(ctx context.Context, user model.User) error
-	GetUser(ctx context.Context, login, password string) (model.User, error)
+	CreateUser(ctx context.Context, user *model.User) (string, error)
+	GetUserID(ctx context.Context, user *model.User) (string, error)
 }
 
 type OrderRepoContract interface {
-	LoadOrder(ctx context.Context, order model.Order) (int, error)
+	LoadOrder(ctx context.Context, order *model.Order) (int, error)
 }
 
 type BalanceRepoContract interface {

@@ -17,6 +17,6 @@ func NewOrderPostgres(db *sql.DB) *OrderPostgres {
 	}
 }
 
-func (o *OrderPostgres) LoadOrder(ctx context.Context, order model.Order) (int, error) {
-	return 0, nil
+func (o *OrderPostgres) LoadOrder(ctx context.Context, order *model.Order) (int, error) {
+	return -1, nil
 }

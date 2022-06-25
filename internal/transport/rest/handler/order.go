@@ -12,5 +12,5 @@ func (h *Handler) loadOrder(w http.ResponseWriter, r *http.Request) {
 	var order model.Order
 
 	ctx := context.Background()
-	h.Service.LoadOrder(ctx, order)
+	h.Service.LoadOrder(ctx, &order)
 }
