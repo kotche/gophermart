@@ -44,7 +44,7 @@ func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err = h.Service.AuthenticationUser(ctx, &user)
-	if errors.As(err, &model.AuthorizationError{}) {
+	if errors.As(err, &model.AuthenticationError{}) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	} else if err != nil {

@@ -44,7 +44,7 @@ func (a *AuthPostgres) GetUserID(ctx context.Context, user *model.User) (string,
 	var output sql.NullInt64
 	row.Scan(&output)
 	if !output.Valid {
-		return "", model.AuthorizationError{
+		return "", model.AuthenticationError{
 			Err: errors.New("invalid login/password"),
 		}
 	}
