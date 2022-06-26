@@ -5,7 +5,7 @@ import (
 	"database/sql"
 
 	"github.com/kotche/gophermart/internal/model"
-	"github.com/kotche/gophermart/internal/model/errorModel"
+	"github.com/kotche/gophermart/internal/model/errormodel"
 )
 
 type OrderPostgres struct {
@@ -23,9 +23,9 @@ func (o *OrderPostgres) SaveOrder(ctx context.Context, order *model.Order) error
 
 	if userIDinDB != "" {
 		if userIDinDB == order.UserID {
-			return errorModel.OrderAlreadyUploadedCurrentUserError{}
+			return errormodel.OrderAlreadyUploadedCurrentUserError{}
 		} else {
-			return errorModel.OrderAlreadyUploadedAnotherUserError{}
+			return errormodel.OrderAlreadyUploadedAnotherUserError{}
 		}
 	}
 

@@ -1,4 +1,4 @@
-package errorModel
+package errormodel
 
 import "fmt"
 

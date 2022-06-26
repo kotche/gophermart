@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/kotche/gophermart/internal/model/errorModel"
+	"github.com/kotche/gophermart/internal/model/errormodel"
 )
 
 // loadOrder POST /api/user/orders - загрузка номера заказа
@@ -35,13 +35,13 @@ func (h *Handler) loadOrder(w http.ResponseWriter, r *http.Request) {
 	switch err.(type) {
 	case nil:
 		w.WriteHeader(http.StatusAccepted)
-	case errorModel.OrderAlreadyUploadedCurrentUserError:
+	case errormodel.OrderAlreadyUploadedCurrentUserError:
 		http.Error(w, err.Error(), http.StatusOK)
 		return
-	case errorModel.OrderAlreadyUploadedAnotherUserError:
+	case errormodel.OrderAlreadyUploadedAnotherUserError:
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
-	case errorModel.CheckLuhnError:
+	case errormodel.CheckLuhnError:
 		http.Error(w, err.Error(), http.StatusUnprocessableEntity)
 		return
 	default:

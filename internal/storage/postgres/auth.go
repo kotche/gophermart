@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/kotche/gophermart/internal/model"
-	"github.com/kotche/gophermart/internal/model/errorModel"
+	"github.com/kotche/gophermart/internal/model/errormodel"
 )
 
 type AuthPostgres struct {
@@ -30,7 +30,7 @@ func (a *AuthPostgres) CreateUser(ctx context.Context, user *model.User) (string
 	var output sql.NullInt64
 	result.Scan(&output)
 	if !output.Valid {
-		return "", errorModel.ConflictLoginError{
+		return "", errormodel.ConflictLoginError{
 			Login: user.Login,
 		}
 	}
@@ -44,7 +44,7 @@ func (a *AuthPostgres) GetUserID(ctx context.Context, user *model.User) (string,
 	var output sql.NullInt64
 	row.Scan(&output)
 	if !output.Valid {
-		return "", errorModel.AuthenticationError{}
+		return "", errormodel.AuthenticationError{}
 	}
 	userID := fmt.Sprintf("%d", output.Int64)
 	return userID, nil

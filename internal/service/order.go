@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/kotche/gophermart/internal/model"
-	"github.com/kotche/gophermart/internal/model/errorModel"
+	"github.com/kotche/gophermart/internal/model/errormodel"
 	"github.com/kotche/gophermart/internal/model/status"
 )
 
@@ -32,7 +32,7 @@ func (o *OrderService) LoadOrder(ctx context.Context, numOrder, userID string) e
 		return err
 	}
 	if !o.CheckLuhn(numOrderInt) {
-		return errorModel.CheckLuhnError{}
+		return errormodel.CheckLuhnError{}
 	}
 
 	order := model.Order{
