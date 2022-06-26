@@ -15,23 +15,18 @@ type AuthServiceContract interface {
 }
 
 type OrderServiceContract interface {
-	LoadOrder(ctx context.Context, order *model.Order) (int, error)
-}
-
-type BalanceServiceContract interface {
-	GetCurrentBalance(ctx context.Context) (int, error)
+	LoadOrder(ctx context.Context, userID, numOrder string) error
+	CheckLuhn(number int) bool
 }
 
 type Service struct {
 	AuthServiceContract
 	OrderServiceContract
-	BalanceServiceContract
 }
 
 func NewService(repo *storage.Repository) *Service {
 	return &Service{
-		AuthServiceContract:    NewAuthService(repo),
-		OrderServiceContract:   NewOrderService(repo),
-		BalanceServiceContract: NewBalanceService(repo),
+		AuthServiceContract:  NewAuthService(repo),
+		OrderServiceContract: NewOrderService(repo),
 	}
 }

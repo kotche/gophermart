@@ -44,7 +44,6 @@ func (h *Handler) InitRoutes() *chi.Mux {
 		router.Use(jwtauth.Authenticator)
 
 		router.Post("/api/user/orders", h.loadOrder)
-		router.Get("/api/user/balance", h.getCurrentBalance)
 	})
 
 	return router

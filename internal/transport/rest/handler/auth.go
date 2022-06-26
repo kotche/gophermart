@@ -9,6 +9,7 @@ import (
 	"net/http"
 
 	"github.com/kotche/gophermart/internal/model"
+	"github.com/kotche/gophermart/internal/model/errorModel"
 )
 
 // registration POST /api/user/register - регистрация пользователя
@@ -22,7 +23,7 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	err = h.Service.CreateUser(ctx, &user)
 
-	if errors.As(err, &model.ConflictLoginError{}) {
+	if errors.As(err, &errorModel.ConflictLoginError{}) {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	} else if err != nil {
@@ -44,7 +45,7 @@ func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err = h.Service.AuthenticationUser(ctx, &user)
-	if errors.As(err, &model.AuthenticationError{}) {
+	if errors.As(err, &errorModel.AuthenticationError{}) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	} else if err != nil {

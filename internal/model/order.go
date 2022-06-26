@@ -1,8 +1,10 @@
 package model
 
+import "time"
+
 type Order struct {
-	ID     string `json:"id"`
-	Number string `json:"number"`
-	User   string
-	Status string
+	Number     string    `json:"number"`
+	UserID     string    `json:"user_id"`
+	Status     string    `json:"status"`
+	UploadedAt time.Time `json:"uploaded_at"`
 }

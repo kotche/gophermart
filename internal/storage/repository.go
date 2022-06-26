@@ -14,23 +14,18 @@ type AuthRepoContract interface {
 }
 
 type OrderRepoContract interface {
-	LoadOrder(ctx context.Context, order *model.Order) (int, error)
-}
-
-type BalanceRepoContract interface {
-	GetCurrentBalance(ctx context.Context) (int, error)
+	SaveOrder(ctx context.Context, order *model.Order) error
+	GetUserIDByNumberOrder(ctx context.Context, number string) string
 }
 
 type Repository struct {
 	AuthRepoContract
 	OrderRepoContract
-	BalanceRepoContract
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		AuthRepoContract:    postgres.NewAuthPostgres(db),
-		OrderRepoContract:   postgres.NewOrderPostgres(db),
-		BalanceRepoContract: postgres.NewBalancePostgres(db),
+		AuthRepoContract:  postgres.NewAuthPostgres(db),
+		OrderRepoContract: postgres.NewOrderPostgres(db),
 	}
 }

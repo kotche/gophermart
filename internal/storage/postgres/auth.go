@@ -3,10 +3,10 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 
 	"github.com/kotche/gophermart/internal/model"
+	"github.com/kotche/gophermart/internal/model/errorModel"
 )
 
 type AuthPostgres struct {
@@ -25,12 +25,12 @@ func (a *AuthPostgres) CreateUser(ctx context.Context, user *model.User) (string
 	if err != nil {
 		return "", err
 	}
+	defer stmt.Close()
 	result := stmt.QueryRowContext(ctx, user.Login, user.Password)
 	var output sql.NullInt64
 	result.Scan(&output)
 	if !output.Valid {
-		return "", model.ConflictLoginError{
-			Err:   errors.New("duplicate login"),
+		return "", errorModel.ConflictLoginError{
 			Login: user.Login,
 		}
 	}
@@ -44,9 +44,7 @@ func (a *AuthPostgres) GetUserID(ctx context.Context, user *model.User) (string,
 	var output sql.NullInt64
 	row.Scan(&output)
 	if !output.Valid {
-		return "", model.AuthenticationError{
-			Err: errors.New("invalid login/password"),
-		}
+		return "", errorModel.AuthenticationError{}
 	}
 	userID := fmt.Sprintf("%d", output.Int64)
 	return userID, nil
