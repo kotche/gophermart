@@ -12,7 +12,7 @@ import (
 
 type OrderRepoContract interface {
 	SaveOrder(ctx context.Context, order *model.Order) error
-	GetUserIDByNumberOrder(ctx context.Context, number string) string
+	GetUserIDByNumberOrder(ctx context.Context, number string) int
 }
 
 type OrderService struct {
@@ -25,7 +25,7 @@ func NewOrderService(repo OrderRepoContract) *OrderService {
 	}
 }
 
-func (o *OrderService) LoadOrder(ctx context.Context, numOrder, userID string) error {
+func (o *OrderService) LoadOrder(ctx context.Context, numOrder string, userID int) error {
 
 	numOrderInt, err := strconv.Atoi(numOrder)
 	if err != nil {
@@ -46,8 +46,6 @@ func (o *OrderService) LoadOrder(ctx context.Context, numOrder, userID string) e
 	if err != nil {
 		return err
 	}
-
-	//загрузить в канал для чтения воркерами (проверка начисления баллов)
 
 	return nil
 }

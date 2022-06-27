@@ -9,13 +9,13 @@ import (
 )
 
 type AuthRepoContract interface {
-	CreateUser(ctx context.Context, user *model.User) (string, error)
-	GetUserID(ctx context.Context, user *model.User) (string, error)
+	CreateUser(ctx context.Context, user *model.User) (int, error)
+	GetUserID(ctx context.Context, user *model.User) (int, error)
 }
 
 type OrderRepoContract interface {
 	SaveOrder(ctx context.Context, order *model.Order) error
-	GetUserIDByNumberOrder(ctx context.Context, number string) string
+	GetUserIDByNumberOrder(ctx context.Context, number string) int
 }
 
 type Repository struct {

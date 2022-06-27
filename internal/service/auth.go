@@ -14,8 +14,8 @@ const (
 )
 
 type AuthRepoContract interface {
-	CreateUser(ctx context.Context, user *model.User) (string, error)
-	GetUserID(ctx context.Context, user *model.User) (string, error)
+	CreateUser(ctx context.Context, user *model.User) (int, error)
+	GetUserID(ctx context.Context, user *model.User) (int, error)
 }
 
 type AuthService struct {

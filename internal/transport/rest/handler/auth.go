@@ -45,6 +45,7 @@ func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err = h.Service.AuthenticationUser(ctx, &user)
+
 	if errors.As(err, &errormodel.AuthenticationError{}) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
@@ -54,16 +55,6 @@ func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.writeToken(w, &user)
-}
-
-func (h *Handler) writeToken(w http.ResponseWriter, user *model.User) {
-	token, err := h.Service.GenerateToken(user, h.TokenAuth)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Authorization", "BEARER "+token)
 }
 
 func readingUserData(w http.ResponseWriter, r *http.Request, user *model.User) error {
@@ -85,4 +76,14 @@ func readingUserData(w http.ResponseWriter, r *http.Request, user *model.User) e
 		return err
 	}
 	return nil
+}
+
+func (h *Handler) writeToken(w http.ResponseWriter, user *model.User) {
+	token, err := h.Service.GenerateToken(user, h.TokenAuth)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Authorization", "BEARER "+token)
 }

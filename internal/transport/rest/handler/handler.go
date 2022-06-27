@@ -20,11 +20,10 @@ type Handler struct {
 func NewHandler(service *service.Service) *Handler {
 	tokenAuth := jwtauth.New("HS256", []byte(signingKey), nil)
 
-	handler := &Handler{
+	return &Handler{
 		Service:   service,
 		TokenAuth: tokenAuth,
 	}
-	return handler
 }
 
 func (h *Handler) InitRoutes() *chi.Mux {

@@ -15,7 +15,7 @@ type AuthServiceContract interface {
 }
 
 type OrderServiceContract interface {
-	LoadOrder(ctx context.Context, userID, numOrder string) error
+	LoadOrder(ctx context.Context, numOrder string, userID int) error
 	CheckLuhn(number int) bool
 }
 

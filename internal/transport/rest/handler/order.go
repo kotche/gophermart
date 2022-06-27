@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/kotche/gophermart/internal/model/errormodel"
@@ -27,7 +28,12 @@ func (h *Handler) loadOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	numOrder := string(body)
-	userID := fmt.Sprintf("%v", claims["user_id"])
+	userID, err := strconv.Atoi(fmt.Sprintf("%v", claims["user_id"]))
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
 
 	ctx := context.Background()
 	err = h.Service.LoadOrder(ctx, numOrder, userID)

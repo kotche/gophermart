@@ -14,16 +14,17 @@ import (
 func main() {
 	conf, err := config.NewConfig()
 	if err != nil {
-		log.Fatal(err.Error())
-		return
+		log.Fatalf("Сonfiguration error: %s", err.Error())
 	}
 
 	pgx, err := postgres.NewPGX(conf.DBConnect)
 	if err != nil {
-		log.Fatal(err.Error())
-		return
+		log.Fatalf("DB connection error: %s", err.Error())
 	}
-	pgx.Init()
+	err = pgx.Init()
+	if err != nil {
+		log.Fatalf("Error creating tables: %s", err.Error())
+	}
 
 	repos := storage.NewRepository(pgx.DB)
 	services := service.NewService(repos)
