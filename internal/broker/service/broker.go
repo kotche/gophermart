@@ -51,25 +51,26 @@ func NewBroker(repo RepositoryContract, accrualURL string) *Broker {
 	}
 }
 
-func (b *Broker) Start() {
-	go b.GetOrdersForProcessing()
-	go b.GetOrdersAccrual()
-	go b.LoadOrdersAccrual()
+func (b *Broker) Start(ctx context.Context) {
+	go b.GetOrdersForProcessing(ctx)
+	go b.GetOrdersAccrual(ctx)
+	go b.LoadOrdersAccrual(ctx)
 }
 
 //GetOrdersForProcessing Получаем номера заказов из БД со статусом "NEW" и "PROCESSING" -> кидаем в канал
-func (b *Broker) GetOrdersForProcessing() {
+func (b *Broker) GetOrdersForProcessing(ctx context.Context) {
 
-	heartbeat := time.Tick(timeoutGetOrdersDB * time.Second)
+	ticker := time.NewTicker(timeoutGetOrdersDB * time.Second)
 
-	ctx := context.Background()
 	for {
 		select {
 		case <-b.chSignalGetOrdersForProcessing:
-			heartbeat = time.Tick(timeoutGetOrdersDB * time.Second)
 			b.runGetOrdersForProcessing(ctx)
-		case <-heartbeat:
+			ticker.Reset(timeoutGetOrdersDB * time.Second)
+		case <-ticker.C:
 			b.runGetOrdersForProcessing(ctx)
+		case <-ctx.Done():
+			return
 		}
 	}
 }
@@ -86,10 +87,15 @@ func (b *Broker) runGetOrdersForProcessing(ctx context.Context) {
 }
 
 //GetOrdersAccrual Получаем из канала номера заказов -> обращаемся к сервису accrual за информацией по статусу и начисленных баллов. Ограничиваем обращения до maxWorkers
-func (b *Broker) GetOrdersAccrual() {
-	for order := range b.chOrdersForProcessing {
-		b.chLimitWorkers <- 1
-		go b.getOrdersAccrualWorker(order)
+func (b *Broker) GetOrdersAccrual(ctx context.Context) {
+	for {
+		select {
+		case order := <-b.chOrdersForProcessing:
+			b.chLimitWorkers <- 1
+			go b.getOrdersAccrualWorker(order)
+		case <-ctx.Done():
+			return
+		}
 	}
 }
 
@@ -127,23 +133,24 @@ func (b *Broker) getJSONOrderFromAccrual(url string, orderAccrual *model.OrderAc
 }
 
 //LoadOrdersAccrual Записываем данные по ордерам в БД (по наполению буфера или по таймауту)
-func (b *Broker) LoadOrdersAccrual() {
+func (b *Broker) LoadOrdersAccrual(ctx context.Context) {
 
-	heartbeat := time.Tick(timeoutLoadOrdersDB * time.Second)
+	ticker := time.NewTicker(timeoutGetOrdersDB * time.Second)
 
-	ctx := context.Background()
 	for {
 		select {
 		case order := <-b.chOrdersAccrual:
-			heartbeat = time.Tick(timeoutLoadOrdersDB * time.Second)
 			b.bufOrderForRecord = append(b.bufOrderForRecord, order)
 			if len(b.bufOrderForRecord) >= bufSizeOrdersRecord {
 				b.flush(ctx)
 			}
-		case <-heartbeat:
+			ticker.Reset(timeoutLoadOrdersDB * time.Second)
+		case <-ticker.C:
 			if len(b.bufOrderForRecord) > 0 {
 				b.flush(ctx)
 			}
+		case <-ctx.Done():
+			return
 		}
 	}
 }

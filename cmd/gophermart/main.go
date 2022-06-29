@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 
@@ -28,13 +29,15 @@ func main() {
 		log.Fatalf("Error creating tables: %s", err.Error())
 	}
 
+	ctx := context.Background()
+
 	repos := storage.NewRepository(pgx.DB)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
 	repos2 := storage2.NewRepository(pgx.DB)
 	broker := service2.NewBroker(repos2, conf.AccrualAddr)
-	broker.Start()
+	broker.Start(ctx)
 
 	log.Fatal(http.ListenAndServe(conf.GophermartAddr, handlers.InitRoutes()))
 }
