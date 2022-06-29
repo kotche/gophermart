@@ -14,19 +14,20 @@ type AuthServiceContract interface {
 	GenerateToken(user *model.User, tokenAuth *jwtauth.JWTAuth) (string, error)
 }
 
-type OrderServiceContract interface {
+type AccrualOrderServiceContract interface {
 	LoadOrder(ctx context.Context, numOrder string, userID int) error
 	CheckLuhn(number int) bool
+	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 
 type Service struct {
 	AuthServiceContract
-	OrderServiceContract
+	AccrualOrderServiceContract
 }
 
 func NewService(repo *storage.Repository) *Service {
 	return &Service{
-		AuthServiceContract:  NewAuthService(repo),
-		OrderServiceContract: NewOrderService(repo),
+		AuthServiceContract:         NewAuthService(repo),
+		AccrualOrderServiceContract: NewAccrualOrderService(repo),
 	}
 }

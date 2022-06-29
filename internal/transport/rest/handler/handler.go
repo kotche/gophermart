@@ -9,6 +9,11 @@ import (
 )
 
 const (
+	registration      = "/api/user/register"
+	authentication    = "/api/user/login"
+	loadOrders        = "/api/user/orders"
+	getUploadedOrders = "/api/user/orders"
+
 	signingKey = "KSFjH$53KSFjH6745u#uEQQjF349%835hFpzA"
 )
 
@@ -33,8 +38,8 @@ func (h *Handler) InitRoutes() *chi.Mux {
 
 	// Public routes
 	router.Group(func(router chi.Router) {
-		router.Post("/api/user/register", h.registration)
-		router.Post("/api/user/login", h.authentication)
+		router.Post(registration, h.registration)
+		router.Post(authentication, h.authentication)
 	})
 
 	// Protected routes
@@ -42,7 +47,8 @@ func (h *Handler) InitRoutes() *chi.Mux {
 		router.Use(jwtauth.Verifier(h.TokenAuth))
 		router.Use(jwtauth.Authenticator)
 
-		router.Post("/api/user/orders", h.loadOrder)
+		router.Post(loadOrders, h.loadOrders)
+		router.Get(getUploadedOrders, h.getUploadedOrders)
 	})
 
 	return router
