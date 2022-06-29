@@ -13,7 +13,7 @@ import (
 
 type AccrualOrderRepoContract interface {
 	SaveOrder(ctx context.Context, order *model.AccrualOrder) error
-	GetUserIDByNumberOrder(ctx context.Context, number string) int
+	GetUserIDByNumberOrder(ctx context.Context, number string) (int, error)
 	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 
