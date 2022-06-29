@@ -19,10 +19,7 @@ func NewAccrualOrderPostgres(db *sql.DB) *AccrualOrderPostgres {
 }
 
 func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.AccrualOrder) error {
-	userIDinDB, err := a.GetUserIDByNumberOrder(ctx, order.Number)
-	if err != nil {
-		return err
-	}
+	userIDinDB := a.GetUserIDByNumberOrder(ctx, order.Number)
 
 	if userIDinDB != 0 {
 		if userIDinDB == order.UserID {
@@ -53,14 +50,12 @@ func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.Accru
 	return tx.Commit()
 }
 
-func (a *AccrualOrderPostgres) GetUserIDByNumberOrder(ctx context.Context, number string) (int, error) {
+func (a *AccrualOrderPostgres) GetUserIDByNumberOrder(ctx context.Context, number string) int {
 	row := a.db.QueryRowContext(ctx, "SELECT user_id FROM public.accruals WHERE order_num=$1", number)
 	var userID int
-	err := row.Scan(&userID)
-	if err != nil {
-		return 0, err
-	}
-	return userID, nil
+	row.Scan(&userID)
+
+	return userID
 }
 
 func (a *AccrualOrderPostgres) GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error) {

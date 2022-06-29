@@ -15,7 +15,7 @@ type AuthRepoContract interface {
 
 type AccrualOrderRepoContract interface {
 	SaveOrder(ctx context.Context, order *model.AccrualOrder) error
-	GetUserIDByNumberOrder(ctx context.Context, number string) (int, error)
+	GetUserIDByNumberOrder(ctx context.Context, number string) int
 	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 
