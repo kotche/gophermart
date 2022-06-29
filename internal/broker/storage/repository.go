@@ -24,6 +24,8 @@ func (r *Repository) GetOrdersForProcessing(ctx context.Context, limit int) ([]m
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	var orders []model.Order
 	for rows.Next() {
 		var order model.Order
@@ -33,6 +35,10 @@ func (r *Repository) GetOrdersForProcessing(ctx context.Context, limit int) ([]m
 		}
 		orders = append(orders, order)
 	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return orders, nil
 }
 
