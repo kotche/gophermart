@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 
+	service2 "github.com/kotche/gophermart/internal/broker/service"
+	storage2 "github.com/kotche/gophermart/internal/broker/storage"
 	"github.com/kotche/gophermart/internal/config"
 	"github.com/kotche/gophermart/internal/service"
 	"github.com/kotche/gophermart/internal/storage"
@@ -29,6 +31,10 @@ func main() {
 	repos := storage.NewRepository(pgx.DB)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
+
+	repos2 := storage2.NewRepository(pgx.DB)
+	broker := service2.NewBroker(repos2, conf.AccrualAddr)
+	broker.Start()
 
 	log.Fatal(http.ListenAndServe(conf.GophermartAddr, handlers.InitRoutes()))
 }

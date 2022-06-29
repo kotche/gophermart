@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-	GophermartAddr string `env:"RUN_ADDRESS" envDefault:"localhost:8080"`
+	GophermartAddr string `env:"RUN_ADDRESS" envDefault:"localhost:8070"`
 	DBConnect      string `env:"DATABASE_URI"`
-	AccrualAddr    string `env:"ACCRUAL_SYSTEM_ADDRESS"`
+	AccrualAddr    string `env:"ACCRUAL_SYSTEM_ADDRESS" envDefault:"http://localhost:8080"`
 }
 
 func NewConfig() (*Config, error) {
@@ -21,7 +21,7 @@ func NewConfig() (*Config, error) {
 
 	regStringVar(&conf.GophermartAddr, "a", conf.GophermartAddr, "gophermart address")
 	regStringVar(&conf.DBConnect, "d", conf.DBConnect, "database connection")
-	regStringVar(&conf.AccrualAddr, "r", conf.AccrualAddr, "accrual address")
+	regStringVar(&conf.AccrualAddr, "r", conf.AccrualAddr, "broker address")
 	flag.Parse()
 
 	return conf, nil
