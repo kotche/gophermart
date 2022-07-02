@@ -26,7 +26,7 @@ func (h *Handler) loadOrders(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if len(body) == 0 {
-		log.Printf("handler.loadOrders - body empty: %s", err.Error())
+		log.Println("handler.loadOrders - body empty")
 		http.Error(w, "incorrect input data", http.StatusBadRequest)
 		return
 	}
