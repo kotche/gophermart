@@ -2,9 +2,7 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"io"
 	"log"
 	"net/http"
 
@@ -15,7 +13,7 @@ import (
 // registration POST /api/user/register - регистрация пользователя
 func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 	var user model.User
-	err := readingUserData(w, r, &user)
+	err := readingUserData(w, r, &user, "handler.registration")
 	if err != nil {
 		return
 	}
@@ -32,13 +30,13 @@ func (h *Handler) registration(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.writeToken(w, &user)
+	h.writeToken(w, &user, "handler.registration")
 }
 
 //authentication POST /api/user/login - аутентификация пользователя
 func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 	var user model.User
-	err := readingUserData(w, r, &user)
+	err := readingUserData(w, r, &user, "handler.authentication")
 	if err != nil {
 		return
 	}
@@ -54,36 +52,5 @@ func (h *Handler) authentication(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "internal server error", http.StatusInternalServerError)
 		return
 	}
-	h.writeToken(w, &user)
-}
-
-func readingUserData(w http.ResponseWriter, r *http.Request, user *model.User) error {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "incorrect input data", http.StatusBadRequest)
-		return err
-	}
-	defer r.Body.Close()
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		http.Error(w, "json read error", http.StatusInternalServerError)
-		return err
-	}
-
-	if user.Login == "" || user.Password == "" {
-		http.Error(w, "empty login or password", http.StatusBadRequest)
-		return err
-	}
-	return nil
-}
-
-func (h *Handler) writeToken(w http.ResponseWriter, user *model.User) {
-	token, err := h.Service.GenerateToken(user, h.TokenAuth)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "internal server error", http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Authorization", "BEARER "+token)
+	h.writeToken(w, &user, "handler.authentication")
 }

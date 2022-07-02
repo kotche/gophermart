@@ -45,6 +45,15 @@ func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder string, us
 		UploadedAt: time.Now(),
 	}
 
+	userIDinDB := a.repo.GetUserIDByNumberOrder(ctx, order.Number)
+	if userIDinDB != 0 {
+		if userIDinDB == order.UserID {
+			return errormodel.OrderAlreadyUploadedCurrentUserError{}
+		} else {
+			return errormodel.OrderAlreadyUploadedAnotherUserError{}
+		}
+	}
+
 	err = a.repo.SaveOrder(ctx, &order)
 	if err != nil {
 		log.Printf("SaveOrder db error: %s", err.Error())

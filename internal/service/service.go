@@ -20,14 +20,22 @@ type AccrualOrderServiceContract interface {
 	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 
+type WithdrawOrderServiceContract interface {
+	DeductionOfPoints(ctx context.Context, order *model.WithdrawOrder) error
+	GetBalance(ctx context.Context, userID int) (float32, float32)
+	GetWithdrawalOfPoints(ctx context.Context, userID int) ([]model.WithdrawOrder, error)
+}
+
 type Service struct {
 	AuthServiceContract
 	AccrualOrderServiceContract
+	WithdrawOrderServiceContract
 }
 
 func NewService(repo *storage.Repository) *Service {
 	return &Service{
-		AuthServiceContract:         NewAuthService(repo),
-		AccrualOrderServiceContract: NewAccrualOrderService(repo),
+		AuthServiceContract:          NewAuthService(repo),
+		AccrualOrderServiceContract:  NewAccrualOrderService(repo),
+		WithdrawOrderServiceContract: NewWithdrawOrderService(repo),
 	}
 }

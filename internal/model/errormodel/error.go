@@ -33,3 +33,10 @@ type CheckLuhnError struct{}
 func (c CheckLuhnError) Error() string {
 	return "invalid order number format"
 }
+
+type NotEnoughPoints struct {
+}
+
+func (n NotEnoughPoints) Error() string {
+	return "not enough points on the account"
+}

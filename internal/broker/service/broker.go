@@ -78,7 +78,7 @@ func (b *Broker) GetOrdersForProcessing(ctx context.Context) {
 func (b *Broker) runGetOrdersForProcessing(ctx context.Context) {
 	orders, err := b.repo.GetOrdersForProcessing(ctx, limitQuery)
 	if err != nil {
-		log.Fatalf("error receiving orders for processing: %s", err.Error())
+		log.Fatalf("broker runGetOrdersForProcessing db error receiving orders for processing: %s", err.Error())
 	}
 
 	for _, numOrder := range orders {
@@ -120,13 +120,14 @@ func (b *Broker) getOrdersAccrualWorker(order model.Order) {
 func (b *Broker) getJSONOrderFromAccrual(url string, orderAccrual *model.OrderAccrual) error {
 	resp, err := b.client.Get(url)
 	if err != nil {
-		log.Printf("service accrual request error: %s", err.Error())
+		log.Printf("broker getJSONOrderFromAccrual service accrual request error: %s", err.Error())
 		return err
 	}
 	defer resp.Body.Close()
+
 	err = json.NewDecoder(resp.Body).Decode(&orderAccrual)
 	if err != nil {
-		log.Printf("decode accrual request error: %s", err.Error())
+		log.Printf("broker getJSONOrderFromAccrual decode accrual request error: %s", err.Error())
 		return err
 	}
 	return nil
@@ -134,7 +135,6 @@ func (b *Broker) getJSONOrderFromAccrual(url string, orderAccrual *model.OrderAc
 
 //LoadOrdersAccrual Записываем данные по ордерам в БД (по наполению буфера или по таймауту)
 func (b *Broker) LoadOrdersAccrual(ctx context.Context) {
-
 	ticker := time.NewTicker(timeoutGetOrdersDB * time.Second)
 
 	for {
@@ -162,7 +162,7 @@ func (b *Broker) flush(ctx context.Context) {
 	go func() {
 		err := b.repo.UpdateOrderAccruals(ctx, ordersUpdate)
 		if err != nil {
-			log.Printf("error update orders: %s", err.Error())
+			log.Printf("broker flush db error update orders: %s", err.Error())
 			return
 		}
 		b.chSignalGetOrdersForProcessing <- struct{}{}

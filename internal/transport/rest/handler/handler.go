@@ -9,10 +9,13 @@ import (
 )
 
 const (
-	registration      = "/api/user/register"
-	authentication    = "/api/user/login"
-	loadOrders        = "/api/user/orders"
-	getUploadedOrders = "/api/user/orders"
+	registration          = "/api/user/register"
+	authentication        = "/api/user/login"
+	loadOrders            = "/api/user/orders"
+	getUploadedOrders     = "/api/user/orders"
+	deductionOfPoints     = "/api/user/balance/withdraw"
+	getWithdrawalOfPoints = "/api/user/balance/withdrawals"
+	getCurrentBalance     = "/api/user/balance"
 
 	signingKey = "KSFjH$53KSFjH6745u#uEQQjF349%835hFpzA"
 )
@@ -49,6 +52,9 @@ func (h *Handler) InitRoutes() *chi.Mux {
 
 		router.Post(loadOrders, h.loadOrders)
 		router.Get(getUploadedOrders, h.getUploadedOrders)
+		router.Post(deductionOfPoints, h.deductionOfPoints)
+		router.Get(getWithdrawalOfPoints, h.getWithdrawalOfPoints)
+		router.Get(getCurrentBalance, h.getCurrentBalance)
 	})
 
 	return router

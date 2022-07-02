@@ -19,14 +19,23 @@ type AccrualOrderRepoContract interface {
 	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 
+type WithdrawOrderRepoContract interface {
+	GetAccruals(ctx context.Context, UserID int) float32
+	GetWithdrawals(ctx context.Context, UserID int) float32
+	DeductPoints(ctx context.Context, order *model.WithdrawOrder) error
+	GetWithdrawalOfPoints(ctx context.Context, userID int) ([]model.WithdrawOrder, error)
+}
+
 type Repository struct {
 	AuthRepoContract
 	AccrualOrderRepoContract
+	WithdrawOrderRepoContract
 }
 
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
-		AuthRepoContract:         postgres.NewAuthPostgres(db),
-		AccrualOrderRepoContract: postgres.NewAccrualOrderPostgres(db),
+		AuthRepoContract:          postgres.NewAuthPostgres(db),
+		AccrualOrderRepoContract:  postgres.NewAccrualOrderPostgres(db),
+		WithdrawOrderRepoContract: postgres.NewWithdrawOrderPostgres(db),
 	}
 }

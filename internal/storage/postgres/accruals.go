@@ -5,7 +5,6 @@ import (
 	"database/sql"
 
 	"github.com/kotche/gophermart/internal/model"
-	"github.com/kotche/gophermart/internal/model/errormodel"
 )
 
 type AccrualOrderPostgres struct {
@@ -19,16 +18,6 @@ func NewAccrualOrderPostgres(db *sql.DB) *AccrualOrderPostgres {
 }
 
 func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.AccrualOrder) error {
-	userIDinDB := a.GetUserIDByNumberOrder(ctx, order.Number)
-
-	if userIDinDB != 0 {
-		if userIDinDB == order.UserID {
-			return errormodel.OrderAlreadyUploadedCurrentUserError{}
-		} else {
-			return errormodel.OrderAlreadyUploadedAnotherUserError{}
-		}
-	}
-
 	tx, err := a.db.Begin()
 	if err != nil {
 		return err
@@ -53,7 +42,7 @@ func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.Accru
 func (a *AccrualOrderPostgres) GetUserIDByNumberOrder(ctx context.Context, number string) int {
 	row := a.db.QueryRowContext(ctx, "SELECT user_id FROM public.accruals WHERE order_num=$1", number)
 	var userID int
-	row.Scan(&userID)
+	_ = row.Scan(&userID)
 
 	return userID
 }
