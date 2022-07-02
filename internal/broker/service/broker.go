@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	timeoutClient       = 10
-	maxWorkers          = 3
+	timeoutClient       = 5
+	maxWorkers          = 1
 	bufSizeOrdersRecord = 1
 	ordersAPI           = "/api/orders/"
 	limitQuery          = 10
