@@ -15,11 +15,11 @@ import (
 const (
 	timeoutClient       = 10
 	maxWorkers          = 3
-	bufSizeOrdersRecord = 3
+	bufSizeOrdersRecord = 1
 	ordersAPI           = "/api/orders/"
-	limitQuery          = 3
-	timeoutLoadOrdersDB = 3
-	timeoutGetOrdersDB  = 5
+	limitQuery          = 10
+	timeoutLoadOrdersDB = 1
+	timeoutGetOrdersDB  = 1
 )
 
 type RepositoryContract interface {
