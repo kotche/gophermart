@@ -18,8 +18,8 @@ const (
 	bufSizeOrdersRecord = 3
 	ordersAPI           = "/api/orders/"
 	limitQuery          = 3
-	timeoutLoadOrdersDB = 5
-	timeoutGetOrdersDB  = 10
+	timeoutLoadOrdersDB = 3
+	timeoutGetOrdersDB  = 5
 )
 
 type RepositoryContract interface {
@@ -104,6 +104,7 @@ func (b *Broker) getOrdersAccrualWorker(order model.Order) {
 	url := fmt.Sprintf("%s%s%s", b.accrualURL, ordersAPI, order.Number)
 	err := b.getJSONOrderFromAccrual(url, &orderAccrual)
 	if err != nil {
+		<-b.chLimitWorkers
 		return
 	}
 
