@@ -1,25 +1,24 @@
-package storage
+package postgres
 
 import (
 	"context"
 	"database/sql"
 
 	"github.com/kotche/gophermart/internal/broker/model"
-	"github.com/kotche/gophermart/internal/broker/model/status"
 )
 
-type Repository struct {
+type BrokerPostgres struct {
 	db *sql.DB
 }
 
-func NewRepository(db *sql.DB) *Repository {
-	return &Repository{
+func NewBrokerPostgres(db *sql.DB) *BrokerPostgres {
+	return &BrokerPostgres{
 		db: db,
 	}
 }
 
-func (r *Repository) GetOrdersForProcessing(ctx context.Context, limit int) ([]model.Order, error) {
-	rows, err := r.db.QueryContext(ctx, "SELECT order_num,status FROM public.accruals WHERE status=$1 OR status=$2 LIMIT $3", status.NEW, status.PROCESSING, limit)
+func (b *BrokerPostgres) GetOrdersForProcessing(ctx context.Context, limit int) ([]model.Order, error) {
+	rows, err := b.db.QueryContext(ctx, "SELECT order_num,status FROM public.accruals WHERE status=$1 OR status=$2 LIMIT $3", model.StatusNEW, model.StatusPROCESSING, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +41,8 @@ func (r *Repository) GetOrdersForProcessing(ctx context.Context, limit int) ([]m
 	return orders, nil
 }
 
-func (r *Repository) UpdateOrderAccruals(ctx context.Context, orderAccruals []model.OrderAccrual) error {
-	tx, err := r.db.Begin()
+func (b *BrokerPostgres) UpdateOrderAccruals(ctx context.Context, orderAccruals []model.OrderAccrual) error {
+	tx, err := b.db.Begin()
 	if err != nil {
 		return err
 	}

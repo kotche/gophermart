@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/kotche/gophermart/internal/model"
 )
@@ -17,12 +18,20 @@ func NewAccrualOrderPostgres(db *sql.DB) *AccrualOrderPostgres {
 	}
 }
 
-func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.AccrualOrder) error {
+func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.AccrualOrder) (err error) {
 	tx, err := a.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+
+	defer func() {
+		if err != nil {
+			txError := tx.Rollback()
+			if txError != nil {
+				err = fmt.Errorf("rollback error %s: %s", txError.Error(), err.Error())
+			}
+		}
+	}()
 
 	_, err = tx.ExecContext(ctx,
 		"INSERT INTO public.orders(order_num,user_id) VALUES ($1,$2)", order.Number, order.UserID)
@@ -39,7 +48,7 @@ func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.Accru
 	return tx.Commit()
 }
 
-func (a *AccrualOrderPostgres) GetUserIDByNumberOrder(ctx context.Context, number string) int {
+func (a *AccrualOrderPostgres) GetUserIDByNumberOrder(ctx context.Context, number uint64) int {
 	row := a.db.QueryRowContext(ctx, "SELECT user_id FROM public.accruals WHERE order_num=$1", number)
 	var userID int
 	_ = row.Scan(&userID)
@@ -62,6 +71,7 @@ func (a *AccrualOrderPostgres) GetUploadedOrders(ctx context.Context, userID int
 		if err != nil {
 			return nil, err
 		}
+		order.StatusString = order.Status.String()
 		orders = append(orders, order)
 	}
 	if err = rows.Err(); err != nil {

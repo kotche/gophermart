@@ -3,17 +3,15 @@ package service
 import (
 	"context"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/model/errormodel"
-	"github.com/kotche/gophermart/internal/model/status"
 )
 
 type AccrualOrderRepoContract interface {
 	SaveOrder(ctx context.Context, order *model.AccrualOrder) error
-	GetUserIDByNumberOrder(ctx context.Context, number string) int
+	GetUserIDByNumberOrder(ctx context.Context, number uint64) int
 	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 
@@ -27,21 +25,16 @@ func NewAccrualOrderService(repo AccrualOrderRepoContract) *AccrualOrderService 
 	}
 }
 
-func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder string, userID int) error {
+func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder uint64, userID int) error {
 
-	numOrderInt, err := strconv.Atoi(numOrder)
-	if err != nil {
-		log.Printf("LoadOrder service - conv from int error: %s", err.Error())
-		return err
-	}
-	if !a.CheckLuhn(numOrderInt) {
+	if !a.CheckLuhn(numOrder) {
 		return errormodel.CheckLuhnError{}
 	}
 
 	order := model.AccrualOrder{
 		Number:     numOrder,
 		UserID:     userID,
-		Status:     status.NEW,
+		Status:     model.StatusNEW,
 		UploadedAt: time.Now(),
 	}
 
@@ -54,7 +47,7 @@ func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder string, us
 		}
 	}
 
-	err = a.repo.SaveOrder(ctx, &order)
+	err := a.repo.SaveOrder(ctx, &order)
 	if err != nil {
 		log.Printf("SaveOrder db error: %s", err.Error())
 		return err
@@ -63,8 +56,8 @@ func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder string, us
 	return nil
 }
 
-func (a *AccrualOrderService) CheckLuhn(number int) bool {
-	var sum int
+func (a *AccrualOrderService) CheckLuhn(number uint64) bool {
+	var sum uint64
 
 	for i := 0; number > 0; i++ {
 		cur := number % 10

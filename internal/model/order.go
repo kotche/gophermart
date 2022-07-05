@@ -1,18 +1,21 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type AccrualOrder struct {
-	UserID     int       `json:"-"`
-	Number     string    `json:"number"`
-	Status     string    `json:"status"`
-	Accrual    float32   `json:"accrual,omitempty"`
-	UploadedAt time.Time `json:"uploaded_at"`
+	UserID       int       `json:"-"`
+	Number       uint64    `json:"number,string"`
+	Status       Status    `json:"-"`
+	StatusString string    `json:"status"`
+	Accrual      float32   `json:"accrual,omitempty"`
+	UploadedAt   time.Time `json:"uploaded_at"`
 }
 
 type WithdrawOrder struct {
 	UserID      int       `json:"-"`
-	Order       string    `json:"order"`
+	Order       uint64    `json:"order,string"`
 	Sum         float32   `json:"sum,omitempty"`
 	ProcessedAt time.Time `json:"processed_at"`
 }

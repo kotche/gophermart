@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/kotche/gophermart/internal/broker/model"
-	"github.com/kotche/gophermart/internal/broker/model/status"
 )
 
 const (
@@ -101,18 +100,16 @@ func (b *Broker) GetOrdersAccrual(ctx context.Context) {
 
 func (b *Broker) getOrdersAccrualWorker(order model.Order) {
 	var orderAccrual model.OrderAccrual
-	url := fmt.Sprintf("%s%s%s", b.accrualURL, ordersAPI, order.Number)
+	url := fmt.Sprintf("%s%s%d", b.accrualURL, ordersAPI, order.Number)
 	err := b.getJSONOrderFromAccrual(url, &orderAccrual)
 	if err != nil {
 		<-b.chLimitWorkers
 		return
 	}
 
-	if orderAccrual.Status == status.REGISTERED {
-		orderAccrual.Status = status.NEW
-	}
+	orderAccrual.Status = model.ConvertStatus(orderAccrual.StatusString)
 
-	if order.Status != "" && order.Status != orderAccrual.Status {
+	if order.Status != model.StatusUNKNOWN && order.Status != orderAccrual.Status {
 		b.chOrdersAccrual <- orderAccrual
 		<-b.chLimitWorkers
 	}

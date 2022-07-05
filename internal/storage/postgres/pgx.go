@@ -47,7 +47,7 @@ func (p *PGX) Init() error {
 			CREATE TABLE IF NOT EXISTS public.accruals(
 				order_num BIGINT PRIMARY KEY,
 				user_id INT NOT NULL,
-				status TEXT NOT NULL DEFAULT 'NEW',
+				status SMALLINT NOT NULL DEFAULT 1,
 				amount DOUBLE PRECISION DEFAULT 0,
 				uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 				FOREIGN KEY (user_id) REFERENCES public.users (id),

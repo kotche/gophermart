@@ -15,8 +15,8 @@ type AuthServiceContract interface {
 }
 
 type AccrualOrderServiceContract interface {
-	LoadOrder(ctx context.Context, numOrder string, userID int) error
-	CheckLuhn(number int) bool
+	LoadOrder(ctx context.Context, numOrder uint64, userID int) error
+	CheckLuhn(number uint64) bool
 	GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error)
 }
 

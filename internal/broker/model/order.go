@@ -1,12 +1,13 @@
 package model
 
 type Order struct {
-	Number string
-	Status string
+	Number uint64
+	Status Status
 }
 
 type OrderAccrual struct {
-	Order   string  `json:"order"`
-	Status  string  `json:"status"`
-	Accrual float32 `json:"accrual,omitempty"`
+	Order        uint64  `json:"order,string"`
+	Status       Status  `json:"-"`
+	StatusString string  `json:"status"`
+	Accrual      float32 `json:"accrual,omitempty"`
 }

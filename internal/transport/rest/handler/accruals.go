@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/kotche/gophermart/internal/model/errormodel"
 )
@@ -30,8 +31,13 @@ func (h *Handler) loadOrders(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "incorrect input data", http.StatusBadRequest)
 		return
 	}
-
-	numOrder := string(body)
+	strBody := string(body)
+	numOrder, err := strconv.ParseUint(strBody, 0, 64)
+	if err != nil {
+		log.Println("handler.loadOrders - ParseUint number order error")
+		http.Error(w, "incorrect input data", http.StatusBadRequest)
+		return
+	}
 
 	ctx := context.Background()
 	err = h.Service.LoadOrder(ctx, numOrder, userID)
