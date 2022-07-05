@@ -24,18 +24,3 @@ func (s Status) String() string {
 		return ""
 	}
 }
-
-func ConvertStatus(status string) Status {
-	switch status {
-	case "NEW":
-		return StatusNEW
-	case "PROCESSING":
-		return StatusPROCESSING
-	case "INVALID":
-		return StatusINVALID
-	case "PROCESSED":
-		return StatusPROCESSED
-	default:
-		return StatusUNKNOWN
-	}
-}

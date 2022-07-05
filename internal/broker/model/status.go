@@ -10,21 +10,6 @@ const (
 	StatusPROCESSED
 )
 
-func (s Status) String() string {
-	switch s {
-	case StatusNEW:
-		return "NEW"
-	case StatusPROCESSING:
-		return "PROCESSING"
-	case StatusINVALID:
-		return "INVALID"
-	case StatusPROCESSED:
-		return "PROCESSED"
-	default:
-		return ""
-	}
-}
-
 func ConvertStatus(status string) Status {
 	switch status {
 	case "NEW", "REGISTERED":
