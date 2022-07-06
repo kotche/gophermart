@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/kotche/gophermart/internal/broker/model"
 )
@@ -18,7 +19,7 @@ func NewBrokerPostgres(db *sql.DB) *BrokerPostgres {
 }
 
 func (b *BrokerPostgres) GetOrdersForProcessing(ctx context.Context, limit int) ([]model.Order, error) {
-	rows, err := b.db.QueryContext(ctx, "SELECT order_num,status FROM public.accruals WHERE status=$1 OR status=$2 LIMIT $3", model.StatusNEW, model.StatusPROCESSING, limit)
+	rows, err := b.db.QueryContext(ctx, "SELECT order_num,status FROM public.accruals WHERE status=$1 OR status=$2 LIMIT $3", model.StatusNEW.String(), model.StatusPROCESSING.String(), limit)
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +29,14 @@ func (b *BrokerPostgres) GetOrdersForProcessing(ctx context.Context, limit int) 
 	var orders []model.Order
 	for rows.Next() {
 		var order model.Order
-		err = rows.Scan(&order.Number, &order.Status)
+		var status string
+		err = rows.Scan(&order.Number, &status)
 		if err != nil {
+			return nil, err
+		}
+		order.Status, err = model.GetStatus(status)
+		if err != nil {
+			log.Printf("broker db GetOrdersForProcessing :%s", model.ErrPlatformInvalidParam.Error())
 			return nil, err
 		}
 		orders = append(orders, order)

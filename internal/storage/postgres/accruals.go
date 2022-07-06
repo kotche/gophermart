@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 
 	"github.com/kotche/gophermart/internal/model"
 )
@@ -41,7 +42,7 @@ func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.Accru
 
 	_, err = tx.ExecContext(ctx,
 		"INSERT INTO public.accruals(order_num,user_id,status,uploaded_at) VALUES ($1,$2,$3,$4)",
-		order.Number, order.UserID, order.Status, order.UploadedAt)
+		order.Number, order.UserID, order.Status.String(), order.UploadedAt)
 	if err != nil {
 		return err
 	}
@@ -67,11 +68,16 @@ func (a *AccrualOrderPostgres) GetUploadedOrders(ctx context.Context, userID int
 	var orders []model.AccrualOrder
 	for rows.Next() {
 		var order model.AccrualOrder
-		err = rows.Scan(&order.Number, &order.Status, &order.Accrual, &order.UploadedAt)
+		var status string
+		err = rows.Scan(&order.Number, &status, &order.Accrual, &order.UploadedAt)
 		if err != nil {
 			return nil, err
 		}
-		order.StatusString = order.Status.String()
+		order.Status, err = model.GetStatus(status)
+		if err != nil {
+			log.Printf("broker db GetOrdersForProcessing :%s", model.ErrPlatformInvalidParam.Error())
+			return nil, err
+		}
 		orders = append(orders, order)
 	}
 	if err = rows.Err(); err != nil {

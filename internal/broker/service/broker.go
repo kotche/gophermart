@@ -107,8 +107,6 @@ func (b *Broker) getOrdersAccrualWorker(order model.Order) {
 		return
 	}
 
-	orderAccrual.Status = model.ConvertStatus(orderAccrual.StatusString)
-
 	if order.Status != model.StatusUNKNOWN && order.Status != orderAccrual.Status {
 		b.chOrdersAccrual <- orderAccrual
 		<-b.chLimitWorkers

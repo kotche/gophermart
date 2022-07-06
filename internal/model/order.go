@@ -5,12 +5,11 @@ import (
 )
 
 type AccrualOrder struct {
-	UserID       int       `json:"-"`
-	Number       uint64    `json:"number,string"`
-	Status       Status    `json:"-"`
-	StatusString string    `json:"status"`
-	Accrual      float32   `json:"accrual,omitempty"`
-	UploadedAt   time.Time `json:"uploaded_at"`
+	UserID     int       `json:"-"`
+	Number     uint64    `json:"number,string"`
+	Status     Status    `json:"status"`
+	Accrual    float32   `json:"accrual,omitempty"`
+	UploadedAt time.Time `json:"uploaded_at"`
 }
 
 type WithdrawOrder struct {
