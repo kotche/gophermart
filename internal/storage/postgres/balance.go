@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/kotche/gophermart/internal/model"
 )
@@ -33,12 +34,20 @@ func (w *WithdrawOrderPostgres) GetWithdrawals(ctx context.Context, UserID int) 
 	return withdrawals
 }
 
-func (w *WithdrawOrderPostgres) DeductPoints(ctx context.Context, order *model.WithdrawOrder) error {
+func (w *WithdrawOrderPostgres) DeductPoints(ctx context.Context, order *model.WithdrawOrder) (err error) {
 	tx, err := w.db.Begin()
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+
+	defer func() {
+		if err != nil {
+			txError := tx.Rollback()
+			if txError != nil {
+				err = fmt.Errorf("balance DeductPoints rollback error %s: %s", txError.Error(), err.Error())
+			}
+		}
+	}()
 
 	_, err = tx.ExecContext(ctx,
 		"INSERT INTO public.orders(order_num,user_id) VALUES ($1,$2)", order.Order, order.UserID)

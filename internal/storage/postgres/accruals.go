@@ -28,7 +28,7 @@ func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.Accru
 		if err != nil {
 			txError := tx.Rollback()
 			if txError != nil {
-				err = fmt.Errorf("rollback error %s: %s", txError.Error(), err.Error())
+				err = fmt.Errorf("accruals SaveOrder rollback error %s: %s", txError.Error(), err.Error())
 			}
 		}
 	}()
