@@ -14,7 +14,7 @@ const (
 	loadOrders            = "/api/user/orders"
 	getUploadedOrders     = "/api/user/orders"
 	deductionOfPoints     = "/api/user/balance/withdraw"
-	getWithdrawalOfPoints = "/api/user/balance/withdrawals"
+	getWithdrawalOfPoints = "/api/user/withdrawals"
 	getCurrentBalance     = "/api/user/balance"
 
 	signingKey = "KSFjH$53KSFjH6745u#uEQQjF349%835hFpzA"
