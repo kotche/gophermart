@@ -4,6 +4,9 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 
 	brokerService "github.com/kotche/gophermart/internal/broker/service"
 	"github.com/kotche/gophermart/internal/config"
@@ -28,9 +31,8 @@ func main() {
 		log.Fatalf("Error creating tables: %s", err.Error())
 	}
 
-	ctx := context.Background()
-	//ctx, cansel := context.WithCancel(context.Background())
-	//defer cansel()
+	ctx, cansel := context.WithCancel(context.Background())
+	defer cansel()
 
 	repos := storage.NewRepository(pgx.DB)
 	services := service.NewService(repos)
@@ -41,14 +43,14 @@ func main() {
 	broker.Start(ctx)
 
 	//graceful shutdown
-	//termChan := make(chan os.Signal, 1)
-	//signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM, os.Interrupt)
-	//
-	//go func() {
-	//	<-termChan
-	//	log.Println("terminating caught")
-	//	cansel()
-	//}()
+	termChan := make(chan os.Signal, 1)
+	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-termChan
+		log.Println("terminating caught")
+		cansel()
+	}()
 
 	log.Fatal(http.ListenAndServe(conf.GophermartAddr, handlers.InitRoutes()))
 }
