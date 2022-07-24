@@ -74,7 +74,7 @@ func (h *Handler) getUploadedOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if orders == nil {
+	if len(orders) == 0 {
 		w.WriteHeader(http.StatusNoContent)
 		return
 	}
