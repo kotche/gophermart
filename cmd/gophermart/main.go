@@ -2,15 +2,15 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	brokerService "github.com/kotche/gophermart/internal/broker/service"
 	"github.com/kotche/gophermart/internal/config"
+	"github.com/kotche/gophermart/internal/logger"
+	"github.com/kotche/gophermart/internal/server"
 	"github.com/kotche/gophermart/internal/service"
 	"github.com/kotche/gophermart/internal/storage"
 	"github.com/kotche/gophermart/internal/storage/postgres"
@@ -18,38 +18,34 @@ import (
 )
 
 func main() {
+	log := logger.Init()
+
 	conf, err := config.NewConfig()
 	if err != nil {
-		log.Fatalf("Сonfiguration error: %s", err.Error())
+		log.Fatal().Err(err).Msg("configuration error")
 	}
 
 	pgx, err := postgres.NewPGX(conf.DBConnect)
 	if err != nil {
-		log.Fatalf("DB connection error: %s", err.Error())
+		log.Fatal().Err(err).Msg("db connection error")
 	}
 	err = pgx.Init()
 	if err != nil {
-		log.Fatalf("Error creating tables: %s", err.Error())
+		log.Fatal().Err(err).Msg("creating tables error")
 	}
 
 	ctx, cansel := context.WithCancel(context.Background())
 	defer cansel()
 
-	repos := storage.NewRepository(pgx.DB)
-	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
+	repos := storage.NewRepository(pgx.DB, log)
+	services := service.NewService(repos, log)
+	handlers := handler.NewHandler(services, log)
 
-	brokerRepos := storage.NewBrokerRepository(pgx.DB)
-	broker := brokerService.NewBroker(brokerRepos, conf.AccrualAddr)
+	brokerRepos := storage.NewBrokerRepository(pgx.DB, log)
+	broker := brokerService.NewBroker(brokerRepos, conf.AccrualAddr, log)
 	broker.Start(ctx)
 
-	srv := &http.Server{
-		Addr:         conf.GophermartAddr,
-		Handler:      handlers.InitRoutes(),
-		IdleTimeout:  60 * time.Second,
-		ReadTimeout:  60 * time.Second,
-		WriteTimeout: 60 * time.Second,
-	}
+	srv := server.NewServer(conf, handlers.InitRoutes())
 
 	//graceful shutdown
 	termChan := make(chan os.Signal, 1)
@@ -57,10 +53,14 @@ func main() {
 
 	go func() {
 		<-termChan
-		log.Println("server shutdown")
-		srv.Shutdown(ctx)
+		log.Info().Msg("server shutdown")
 		cansel()
+		if err = srv.Stop(ctx); err != nil {
+			log.Fatal().Err(err).Msg("server shutdown error")
+		}
 	}()
 
-	log.Fatal(srv.ListenAndServe())
+	if err = srv.Run(); err != nil && err != http.ErrServerClosed {
+		log.Fatal().Err(err).Msg("server run error")
+	}
 }
