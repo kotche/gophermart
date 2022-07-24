@@ -110,6 +110,8 @@ func TestHandlerGetCurrentBalanceUserUnauthorized(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+	
 	assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
 }
 
@@ -171,6 +173,8 @@ func TestHandlerDeductionOfPoints(t *testing.T) {
 			h.InitRoutes().ServeHTTP(w, r)
 
 			response := w.Result()
+			defer response.Body.Close()
+
 			assert.Equal(t, tt.want.status, response.StatusCode)
 		})
 	}
@@ -197,6 +201,8 @@ func TestHandlerDeductionOfPointsUserUnauthorized(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
 }
 
@@ -227,6 +233,8 @@ func TestHandlerDeductionOfPointsInsufficientFunds(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusPaymentRequired, response.StatusCode)
 }
 
@@ -253,6 +261,8 @@ func TestHandlerDeductionOfPointsBadJSON(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 }
 
@@ -331,8 +341,7 @@ func TestHandlerGetWithdrawalOfPoints(t *testing.T) {
 			defer response.Body.Close()
 			body, _ := io.ReadAll(response.Body)
 
-			var ordersResponse []model.WithdrawOrder
-			ordersResponse = []model.WithdrawOrder{}
+			ordersResponse := []model.WithdrawOrder{}
 			_ = json.Unmarshal(body, &ordersResponse)
 
 			assert.Equal(t, tt.want.status, response.StatusCode)
@@ -362,5 +371,7 @@ func TestHandlerGetWithdrawalOfPointsUserUnauthorized(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
 }

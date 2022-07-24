@@ -80,6 +80,8 @@ func TestHandlerRegistration(t *testing.T) {
 			h.InitRoutes().ServeHTTP(w, r)
 
 			response := w.Result()
+			defer response.Body.Close()
+
 			assert.Equal(t, tt.want.status, response.StatusCode)
 		})
 	}
@@ -114,6 +116,8 @@ func TestHandlerRegistrationConflictLogin(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusConflict, response.StatusCode)
 }
 
@@ -141,6 +145,8 @@ func TestHandlerRegistrationBadBodyJson(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 }
 
@@ -206,6 +212,8 @@ func TestHandlerAuthentication(t *testing.T) {
 			h.InitRoutes().ServeHTTP(w, r)
 
 			response := w.Result()
+			defer response.Body.Close()
+
 			assert.Equal(t, tt.want.status, response.StatusCode)
 		})
 	}
@@ -239,6 +247,8 @@ func TestHandlerAuthenticationInvalidLoginOrPassword(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusUnauthorized, response.StatusCode)
 }
 
@@ -266,5 +276,7 @@ func TestHandlerAuthenticationBadBodyJSON(t *testing.T) {
 	h.InitRoutes().ServeHTTP(w, r)
 
 	response := w.Result()
+	defer response.Body.Close()
+
 	assert.Equal(t, http.StatusInternalServerError, response.StatusCode)
 }
