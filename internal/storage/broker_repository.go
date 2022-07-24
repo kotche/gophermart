@@ -6,6 +6,7 @@ import (
 
 	modelBroker "github.com/kotche/gophermart/internal/broker/model"
 	"github.com/kotche/gophermart/internal/storage/postgres"
+	"github.com/rs/zerolog"
 )
 
 type BrokerRepoContract interface {
@@ -17,8 +18,8 @@ type BrokerRepository struct {
 	BrokerRepoContract
 }
 
-func NewBrokerRepository(db *sql.DB) *BrokerRepository {
+func NewBrokerRepository(db *sql.DB, log *zerolog.Logger) *BrokerRepository {
 	return &BrokerRepository{
-		BrokerRepoContract: postgres.NewBrokerPostgres(db),
+		BrokerRepoContract: postgres.NewBrokerPostgres(db, log),
 	}
 }

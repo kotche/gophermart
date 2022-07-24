@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/storage"
+	"github.com/rs/zerolog"
 )
 
 type AuthServiceContract interface {
@@ -27,15 +28,15 @@ type WithdrawOrderServiceContract interface {
 }
 
 type Service struct {
-	AuthServiceContract
-	AccrualOrderServiceContract
-	WithdrawOrderServiceContract
+	Auth     AuthServiceContract
+	Accrual  AccrualOrderServiceContract
+	Withdraw WithdrawOrderServiceContract
 }
 
-func NewService(repo *storage.Repository) *Service {
+func NewService(repo *storage.Repository, log *zerolog.Logger) *Service {
 	return &Service{
-		AuthServiceContract:          NewAuthService(repo),
-		AccrualOrderServiceContract:  NewAccrualOrderService(repo),
-		WithdrawOrderServiceContract: NewWithdrawOrderService(repo),
+		Auth:     NewAuthService(repo.Auth, log),
+		Accrual:  NewAccrualOrderService(repo.Accrual, log),
+		Withdraw: NewWithdrawOrderService(repo.Withdraw, log),
 	}
 }

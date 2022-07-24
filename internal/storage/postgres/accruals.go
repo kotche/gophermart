@@ -4,22 +4,27 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"log"
+	"time"
 
 	"github.com/kotche/gophermart/internal/model"
+	"github.com/rs/zerolog"
 )
 
 type AccrualOrderPostgres struct {
-	db *sql.DB
+	db  *sql.DB
+	log *zerolog.Logger
 }
 
-func NewAccrualOrderPostgres(db *sql.DB) *AccrualOrderPostgres {
+func NewAccrualOrderPostgres(db *sql.DB, log *zerolog.Logger) *AccrualOrderPostgres {
 	return &AccrualOrderPostgres{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
 func (a *AccrualOrderPostgres) SaveOrder(ctx context.Context, order *model.AccrualOrder) (err error) {
+	order.UploadedAt = time.Now()
+
 	tx, err := a.db.Begin()
 	if err != nil {
 		return err
@@ -75,7 +80,7 @@ func (a *AccrualOrderPostgres) GetUploadedOrders(ctx context.Context, userID int
 		}
 		order.Status, err = model.GetStatus(status)
 		if err != nil {
-			log.Printf("broker db GetOrdersForProcessing :%s", model.ErrPlatformInvalidParam.Error())
+			a.log.Error().Err(err).Msg("broker db GetUploadedOrders")
 			return nil, err
 		}
 		orders = append(orders, order)

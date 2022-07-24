@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/kotche/gophermart/internal/model"
+	"github.com/rs/zerolog"
 )
 
 const (
@@ -20,16 +21,18 @@ type AuthRepoContract interface {
 
 type AuthService struct {
 	repo AuthRepoContract
+	log  *zerolog.Logger
 }
 
-func NewAuthService(repo AuthRepoContract) *AuthService {
+func NewAuthService(repo AuthRepoContract, log *zerolog.Logger) *AuthService {
 	return &AuthService{
 		repo: repo,
+		log:  log,
 	}
 }
 
 func (auth *AuthService) CreateUser(ctx context.Context, user *model.User) error {
-	user.Password = generatePasswordHash(user.Password)
+	user.Password = auth.generatePasswordHash(user.Password)
 	userID, err := auth.repo.CreateUser(ctx, user)
 	if err != nil {
 		return err
@@ -39,7 +42,7 @@ func (auth *AuthService) CreateUser(ctx context.Context, user *model.User) error
 }
 
 func (auth *AuthService) AuthenticationUser(ctx context.Context, user *model.User) error {
-	user.Password = generatePasswordHash(user.Password)
+	user.Password = auth.generatePasswordHash(user.Password)
 	userID, err := auth.repo.GetUserID(ctx, user)
 	if err != nil {
 		return err
@@ -53,9 +56,8 @@ func (auth *AuthService) GenerateToken(user *model.User, tokenAuth *jwtauth.JWTA
 	return tokenString, err
 }
 
-func generatePasswordHash(password string) string {
+func (auth *AuthService) generatePasswordHash(password string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
-
 	return fmt.Sprintf("%x", hash.Sum([]byte(secretKey)))
 }

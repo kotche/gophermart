@@ -1,9 +1,3 @@
-.PHONY: build
-	go build C:\Users\NinjaPC\go\src\gophermart\cmd\gophermart\main.go
-
-
-.PHONY: gen
-	gen:
-		mockgen -source=C:\Users\NinjaPC\go\src\gophermart\internal\storage\repository.go -destination=C:\Users\NinjaPC\go\src\gophermart\internal\storage\mocks\mock_repository.go
-
-
+gen:
+	mockgen -source=internal/storage/repository.go -destination=internal/storage/mock/mock_repository.go
+	mockgen -source=internal/service/service.go -destination=internal/service/mock/mock_service.go

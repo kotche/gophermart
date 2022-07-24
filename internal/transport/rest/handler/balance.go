@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
-	"time"
 
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/model/errormodel"
@@ -21,19 +19,19 @@ type balance struct {
 func (h *Handler) getCurrentBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID, err := getUserIDFromToken(w, r, "handler.getCurrentBalance")
+	userID, err := h.getUserIDFromToken(w, r, "handler.getCurrentBalance")
 	if err != nil {
 		return
 	}
 
 	ctx := context.Background()
-	accruals, withdraws := h.Service.GetBalance(ctx, userID)
+	accruals, withdraws := h.Service.Withdraw.GetBalance(ctx, userID)
 
 	b := balance{Current: accruals - withdraws, Withdrawn: withdraws}
 
 	output, err := json.Marshal(b)
 	if err != nil {
-		log.Printf("handler.getCurrentBalance - json write error: %s", err.Error())
+		h.log.Error().Err(err).Msg("Handler.getCurrentBalance: json write error")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
@@ -43,7 +41,7 @@ func (h *Handler) getCurrentBalance(w http.ResponseWriter, r *http.Request) {
 
 //deductionOfPoints POST /api/user/balance/withdraw - запрос на списание средств
 func (h *Handler) deductionOfPoints(w http.ResponseWriter, r *http.Request) {
-	userID, err := getUserIDFromToken(w, r, "handler.deductionOfPoints")
+	userID, err := h.getUserIDFromToken(w, r, "handler.deductionOfPoints")
 	if err != nil {
 		return
 	}
@@ -51,7 +49,7 @@ func (h *Handler) deductionOfPoints(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("handler.deductionOfPoints - body read error: %s", err.Error())
+		h.log.Error().Err(err).Msg("Handler.deductionOfPoints: body read error")
 		http.Error(w, "incorrect input data", http.StatusInternalServerError)
 		return
 	}
@@ -59,16 +57,15 @@ func (h *Handler) deductionOfPoints(w http.ResponseWriter, r *http.Request) {
 	var order *model.WithdrawOrder
 	err = json.Unmarshal(body, &order)
 	if err != nil {
-		log.Printf("handler.deductionOfPoints - json read error: %s", err.Error())
+		h.log.Error().Err(err).Msg("Handler.deductionOfPoints: json read error")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	order.UserID = userID
-	order.ProcessedAt = time.Now()
 
 	ctx := context.Background()
-	err = h.Service.DeductionOfPoints(ctx, order)
+	err = h.Service.Withdraw.DeductionOfPoints(ctx, order)
 
 	switch err.(type) {
 	case nil:
@@ -81,17 +78,17 @@ func (h *Handler) deductionOfPoints(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//deductionOfPoints GET /api/user/balance/withdrawals - получение информации о выводе средств
+//getWithdrawalOfPoints GET /api/user/balance/withdrawals - получение информации о выводе средств
 func (h *Handler) getWithdrawalOfPoints(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID, err := getUserIDFromToken(w, r, "handler.getCurrentBalance")
+	userID, err := h.getUserIDFromToken(w, r, "handler.getCurrentBalance")
 	if err != nil {
 		return
 	}
 
 	ctx := context.Background()
-	orders, err := h.Service.GetWithdrawalOfPoints(ctx, userID)
+	orders, err := h.Service.Withdraw.GetWithdrawalOfPoints(ctx, userID)
 	if err != nil {
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
@@ -104,7 +101,7 @@ func (h *Handler) getWithdrawalOfPoints(w http.ResponseWriter, r *http.Request) 
 
 	output, err := json.Marshal(orders)
 	if err != nil {
-		log.Printf("handler.getWithdrawalOfPoints json marshal error: %s", err.Error())
+		h.log.Error().Err(err).Msg("Handler.getWithdrawalOfPoints: json marshal error")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}

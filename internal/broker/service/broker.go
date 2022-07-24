@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/kotche/gophermart/internal/broker/model"
+	"github.com/rs/zerolog"
 )
 
 const (
@@ -35,9 +35,10 @@ type Broker struct {
 	chOrdersAccrual                chan model.OrderAccrual
 	chSignalGetOrdersForProcessing chan struct{}
 	chLimitWorkers                 chan int
+	log                            *zerolog.Logger
 }
 
-func NewBroker(repo RepositoryContract, accrualURL string) *Broker {
+func NewBroker(repo RepositoryContract, accrualURL string, log *zerolog.Logger) *Broker {
 	return &Broker{
 		repo:                           repo,
 		client:                         &http.Client{Timeout: time.Second * timeoutClient},
@@ -47,6 +48,7 @@ func NewBroker(repo RepositoryContract, accrualURL string) *Broker {
 		chOrdersAccrual:                make(chan model.OrderAccrual),
 		chSignalGetOrdersForProcessing: make(chan struct{}),
 		chLimitWorkers:                 make(chan int, maxWorkers),
+		log:                            log,
 	}
 }
 
@@ -77,7 +79,7 @@ func (b *Broker) GetOrdersForProcessing(ctx context.Context) {
 func (b *Broker) runGetOrdersForProcessing(ctx context.Context) {
 	orders, err := b.repo.GetOrdersForProcessing(ctx, limitQuery)
 	if err != nil {
-		log.Fatalf("broker runGetOrdersForProcessing db error receiving orders for processing: %s", err.Error())
+		b.log.Error().Err(err).Msg("Broker.runGetOrdersForProcessing: GetOrdersForProcessing db error")
 	}
 
 	for _, numOrder := range orders {
@@ -116,14 +118,14 @@ func (b *Broker) getOrdersAccrualWorker(order model.Order) {
 func (b *Broker) getJSONOrderFromAccrual(url string, orderAccrual *model.OrderAccrual) error {
 	resp, err := b.client.Get(url)
 	if err != nil {
-		log.Printf("broker getJSONOrderFromAccrual service accrual request error: %s", err.Error())
+		b.log.Error().Err(err).Msg("Broker.getJSONOrderFromAccrual: Get url error")
 		return err
 	}
 	defer resp.Body.Close()
 
 	err = json.NewDecoder(resp.Body).Decode(&orderAccrual)
 	if err != nil {
-		log.Printf("broker getJSONOrderFromAccrual decode accrual request error: %s", err.Error())
+		b.log.Error().Err(err).Msg("Broker.getJSONOrderFromAccrual: json decode error")
 		return err
 	}
 	return nil
@@ -158,7 +160,7 @@ func (b *Broker) flush(ctx context.Context) {
 	go func() {
 		err := b.repo.UpdateOrderAccruals(ctx, ordersUpdate)
 		if err != nil {
-			log.Printf("broker flush db error update orders: %s", err.Error())
+			b.log.Error().Err(err).Msg("Broker.flush: UpdateOrderAccruals db error")
 			return
 		}
 		b.chSignalGetOrdersForProcessing <- struct{}{}

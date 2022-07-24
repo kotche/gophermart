@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"log"
 
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/model/errormodel"
+	"github.com/rs/zerolog"
 )
 
 type WithdrawOrderRepoContract interface {
@@ -16,11 +16,13 @@ type WithdrawOrderRepoContract interface {
 }
 type WithdrawOrderService struct {
 	repo WithdrawOrderRepoContract
+	log  *zerolog.Logger
 }
 
-func NewWithdrawOrderService(repo WithdrawOrderRepoContract) *WithdrawOrderService {
+func NewWithdrawOrderService(repo WithdrawOrderRepoContract, log *zerolog.Logger) *WithdrawOrderService {
 	return &WithdrawOrderService{
 		repo: repo,
+		log:  log,
 	}
 }
 
@@ -39,7 +41,7 @@ func (w WithdrawOrderService) DeductionOfPoints(ctx context.Context, order *mode
 
 	err := w.repo.DeductPoints(ctx, order)
 	if err != nil {
-		log.Printf("DeductPoints db error: %s", err.Error())
+		w.log.Error().Err(err).Msg("WithdrawOrderService.DeductionOfPoints: DeductPoints db error")
 		return err
 	}
 
@@ -49,7 +51,7 @@ func (w WithdrawOrderService) DeductionOfPoints(ctx context.Context, order *mode
 func (w *WithdrawOrderService) GetWithdrawalOfPoints(ctx context.Context, userID int) ([]model.WithdrawOrder, error) {
 	orders, err := w.repo.GetWithdrawalOfPoints(ctx, userID)
 	if err != nil {
-		log.Printf("balance GetWithdrawalOfPoints db error: %s", err.Error())
+		w.log.Error().Err(err).Msg("WithdrawOrderService.GetWithdrawalOfPoints: GetWithdrawalOfPoints db error")
 		return nil, err
 	}
 	return orders, nil

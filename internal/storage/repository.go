@@ -6,6 +6,7 @@ import (
 
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/storage/postgres"
+	"github.com/rs/zerolog"
 )
 
 type AuthRepoContract interface {
@@ -27,15 +28,15 @@ type WithdrawOrderRepoContract interface {
 }
 
 type Repository struct {
-	AuthRepoContract
-	AccrualOrderRepoContract
-	WithdrawOrderRepoContract
+	Auth     AuthRepoContract
+	Accrual  AccrualOrderRepoContract
+	Withdraw WithdrawOrderRepoContract
 }
 
-func NewRepository(db *sql.DB) *Repository {
+func NewRepository(db *sql.DB, log *zerolog.Logger) *Repository {
 	return &Repository{
-		AuthRepoContract:          postgres.NewAuthPostgres(db),
-		AccrualOrderRepoContract:  postgres.NewAccrualOrderPostgres(db),
-		WithdrawOrderRepoContract: postgres.NewWithdrawOrderPostgres(db),
+		Auth:     postgres.NewAuthPostgres(db, log),
+		Accrual:  postgres.NewAccrualOrderPostgres(db, log),
+		Withdraw: postgres.NewWithdrawOrderPostgres(db, log),
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -13,7 +12,7 @@ import (
 
 // loadOrders POST /api/user/orders - загрузка номера заказа
 func (h *Handler) loadOrders(w http.ResponseWriter, r *http.Request) {
-	userID, err := getUserIDFromToken(w, r, "handler.loadOrders")
+	userID, err := h.getUserIDFromToken(w, r, "handler.loadOrders")
 	if err != nil {
 		return
 	}
@@ -21,26 +20,26 @@ func (h *Handler) loadOrders(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		log.Printf("handler.loadOrders - body read error: %s", err.Error())
+		h.log.Error().Err(err).Msg("Handler.loadOrders: body read error")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}
 
 	if len(body) == 0 {
-		log.Println("handler.loadOrders - body empty")
+		h.log.Info().Msg("Handler.loadOrders: body empty")
 		http.Error(w, "incorrect input data", http.StatusBadRequest)
 		return
 	}
 	strBody := string(body)
 	numOrder, err := strconv.ParseUint(strBody, 0, 64)
 	if err != nil {
-		log.Println("handler.loadOrders - ParseUint number order error")
+		h.log.Error().Err(err).Msg("Handler.loadOrders: ParseUint number order error")
 		http.Error(w, "incorrect input data", http.StatusBadRequest)
 		return
 	}
 
 	ctx := context.Background()
-	err = h.Service.LoadOrder(ctx, numOrder, userID)
+	err = h.Service.Accrual.LoadOrder(ctx, numOrder, userID)
 
 	switch err.(type) {
 	case nil:
@@ -63,13 +62,13 @@ func (h *Handler) loadOrders(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) getUploadedOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 
-	userID, err := getUserIDFromToken(w, r, "handler.getUploadedOrders")
+	userID, err := h.getUserIDFromToken(w, r, "handler.getUploadedOrders")
 	if err != nil {
 		return
 	}
 
 	ctx := context.Background()
-	orders, err := h.Service.GetUploadedOrders(ctx, userID)
+	orders, err := h.Service.Accrual.GetUploadedOrders(ctx, userID)
 	if err != nil {
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
@@ -82,7 +81,7 @@ func (h *Handler) getUploadedOrders(w http.ResponseWriter, r *http.Request) {
 
 	output, err := json.Marshal(orders)
 	if err != nil {
-		log.Printf("getUploadedOrders -json marshal error: %s", err.Error())
+		h.log.Error().Err(err).Msg("Handler.getUploadedOrders: json marshal error")
 		http.Error(w, internalServerError, http.StatusInternalServerError)
 		return
 	}

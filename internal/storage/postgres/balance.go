@@ -4,17 +4,21 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/kotche/gophermart/internal/model"
+	"github.com/rs/zerolog"
 )
 
 type WithdrawOrderPostgres struct {
-	db *sql.DB
+	db  *sql.DB
+	log *zerolog.Logger
 }
 
-func NewWithdrawOrderPostgres(db *sql.DB) *WithdrawOrderPostgres {
+func NewWithdrawOrderPostgres(db *sql.DB, log *zerolog.Logger) *WithdrawOrderPostgres {
 	return &WithdrawOrderPostgres{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
@@ -35,6 +39,8 @@ func (w *WithdrawOrderPostgres) GetWithdrawals(ctx context.Context, UserID int) 
 }
 
 func (w *WithdrawOrderPostgres) DeductPoints(ctx context.Context, order *model.WithdrawOrder) (err error) {
+	order.ProcessedAt = time.Now()
+
 	tx, err := w.db.Begin()
 	if err != nil {
 		return err

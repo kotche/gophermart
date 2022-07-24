@@ -3,18 +3,20 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"log"
 
 	"github.com/kotche/gophermart/internal/broker/model"
+	"github.com/rs/zerolog"
 )
 
 type BrokerPostgres struct {
-	db *sql.DB
+	db  *sql.DB
+	log *zerolog.Logger
 }
 
-func NewBrokerPostgres(db *sql.DB) *BrokerPostgres {
+func NewBrokerPostgres(db *sql.DB, log *zerolog.Logger) *BrokerPostgres {
 	return &BrokerPostgres{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
@@ -36,7 +38,7 @@ func (b *BrokerPostgres) GetOrdersForProcessing(ctx context.Context, limit int) 
 		}
 		order.Status, err = model.GetStatus(status)
 		if err != nil {
-			log.Printf("broker db GetOrdersForProcessing :%s", model.ErrPlatformInvalidParam.Error())
+			b.log.Error().Err(err).Msg("broker db GetOrdersForProcessing")
 			return nil, err
 		}
 		orders = append(orders, order)

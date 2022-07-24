@@ -2,11 +2,10 @@ package service
 
 import (
 	"context"
-	"log"
-	"time"
 
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/model/errormodel"
+	"github.com/rs/zerolog"
 )
 
 type AccrualOrderRepoContract interface {
@@ -17,11 +16,13 @@ type AccrualOrderRepoContract interface {
 
 type AccrualOrderService struct {
 	repo AccrualOrderRepoContract
+	log  *zerolog.Logger
 }
 
-func NewAccrualOrderService(repo AccrualOrderRepoContract) *AccrualOrderService {
+func NewAccrualOrderService(repo AccrualOrderRepoContract, log *zerolog.Logger) *AccrualOrderService {
 	return &AccrualOrderService{
 		repo: repo,
+		log:  log,
 	}
 }
 
@@ -32,10 +33,9 @@ func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder uint64, us
 	}
 
 	order := model.AccrualOrder{
-		Number:     numOrder,
-		UserID:     userID,
-		Status:     model.StatusNEW,
-		UploadedAt: time.Now(),
+		Number: numOrder,
+		UserID: userID,
+		Status: model.StatusNEW,
 	}
 
 	userIDinDB := a.repo.GetUserIDByNumberOrder(ctx, order.Number)
@@ -49,7 +49,7 @@ func (a *AccrualOrderService) LoadOrder(ctx context.Context, numOrder uint64, us
 
 	err := a.repo.SaveOrder(ctx, &order)
 	if err != nil {
-		log.Printf("SaveOrder db error: %s", err.Error())
+		a.log.Error().Err(err).Msg("AccrualOrderService.LoadOrder: SaveOrder db error")
 		return err
 	}
 
@@ -80,7 +80,7 @@ func (a *AccrualOrderService) CheckLuhn(number uint64) bool {
 func (a *AccrualOrderService) GetUploadedOrders(ctx context.Context, userID int) ([]model.AccrualOrder, error) {
 	orders, err := a.repo.GetUploadedOrders(ctx, userID)
 	if err != nil {
-		log.Printf("getUploadedOrders db error: %s", err.Error())
+		a.log.Error().Err(err).Msg("AccrualOrderService.GetUploadedOrders: GetUploadedOrders db error")
 		return nil, err
 	}
 	return orders, nil

@@ -48,7 +48,7 @@ func (p *PGX) Init() error {
 				order_num BIGINT PRIMARY KEY,
 				user_id INT NOT NULL,
 				status TEXT NOT NULL DEFAULT 'NEW',
-				amount DOUBLE PRECISION DEFAULT 0,
+				amount REAL DEFAULT 0,
 				uploaded_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 				FOREIGN KEY (user_id) REFERENCES public.users (id),
 			    FOREIGN KEY (order_num) REFERENCES public.orders (order_num));
@@ -56,7 +56,7 @@ func (p *PGX) Init() error {
 			CREATE TABLE IF NOT EXISTS public.withdrawals(
 			    order_num BIGINT PRIMARY KEY,
 				user_id INT NOT NULL,
-				amount DOUBLE PRECISION DEFAULT 0,
+				amount REAL DEFAULT 0,
 				processed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 				FOREIGN KEY (user_id) REFERENCES public.users (id),
 			    FOREIGN KEY (order_num) REFERENCES public.orders (order_num));

@@ -6,15 +6,18 @@ import (
 
 	"github.com/kotche/gophermart/internal/model"
 	"github.com/kotche/gophermart/internal/model/errormodel"
+	"github.com/rs/zerolog"
 )
 
 type AuthPostgres struct {
-	db *sql.DB
+	db  *sql.DB
+	log *zerolog.Logger
 }
 
-func NewAuthPostgres(db *sql.DB) *AuthPostgres {
+func NewAuthPostgres(db *sql.DB, log *zerolog.Logger) *AuthPostgres {
 	return &AuthPostgres{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
@@ -27,13 +30,12 @@ func (a *AuthPostgres) CreateUser(ctx context.Context, user *model.User) (int, e
 	defer stmt.Close()
 	result := stmt.QueryRowContext(ctx, user.Login, user.Password)
 	var output sql.NullInt32
-	result.Scan(&output)
+	_ = result.Scan(&output)
 	if !output.Valid {
 		return 0, errormodel.ConflictLoginError{
 			Login: user.Login,
 		}
 	}
-
 	userID := int(output.Int32)
 	return userID, nil
 }
@@ -41,7 +43,7 @@ func (a *AuthPostgres) CreateUser(ctx context.Context, user *model.User) (int, e
 func (a *AuthPostgres) GetUserID(ctx context.Context, user *model.User) (int, error) {
 	row := a.db.QueryRowContext(ctx, "SELECT id FROM public.users WHERE login=$1 AND password=$2", user.Login, user.Password)
 	var output sql.NullInt32
-	row.Scan(&output)
+	_ = row.Scan(&output)
 	if !output.Valid {
 		return 0, errormodel.AuthenticationError{}
 	}

@@ -6,11 +6,12 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/kotche/gophermart/internal/service"
 	"github.com/kotche/gophermart/internal/transport/rest/middlewares"
+	"github.com/rs/zerolog"
 )
 
 const (
-	registration          = "/api/user/register"
-	authentication        = "/api/user/login"
+	Registration          = "/api/user/register"
+	Authentication        = "/api/user/login"
 	loadOrders            = "/api/user/orders"
 	getUploadedOrders     = "/api/user/orders"
 	deductionOfPoints     = "/api/user/balance/withdraw"
@@ -23,14 +24,16 @@ const (
 type Handler struct {
 	Service   *service.Service
 	TokenAuth *jwtauth.JWTAuth
+	log       *zerolog.Logger
 }
 
-func NewHandler(service *service.Service) *Handler {
+func NewHandler(service *service.Service, log *zerolog.Logger) *Handler {
 	tokenAuth := jwtauth.New("HS256", []byte(signingKey), nil)
 
 	return &Handler{
 		Service:   service,
 		TokenAuth: tokenAuth,
+		log:       log,
 	}
 }
 
@@ -41,8 +44,8 @@ func (h *Handler) InitRoutes() *chi.Mux {
 
 	// Public routes
 	router.Group(func(router chi.Router) {
-		router.Post(registration, h.registration)
-		router.Post(authentication, h.authentication)
+		router.Post(Registration, h.registration)
+		router.Post(Authentication, h.authentication)
 	})
 
 	// Protected routes
